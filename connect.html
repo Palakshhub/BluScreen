@@ -92,6 +92,29 @@
         </button>
       </div>
     </div>
+
+    <!-- Quick Command Buttons -->
+<div class="grid grid-cols-2 gap-3 w-full mb-4 mx-auto max-w-md">
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="TIME">
+    🕒 Time
+  </button>
+
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="DATE">
+    📅 Date
+  </button>
+
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="WEATHER">
+    🌦 Weather
+  </button>
+
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="TEMPERATURE">
+    🌡 Temperature
+  </button>
+</div>
   </main>
 
   <!-- Script -->
@@ -192,6 +215,16 @@
 
     sendVoiceBtn.addEventListener('click', () => sendCommand(voiceText.textContent.trim()));
     sendTextBtn.addEventListener('click', () => sendCommand(typeInput.value.trim()));
+
+    // Quick command buttons
+document.querySelectorAll('.quickCmd').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const command = btn.dataset.command;
+    sendCommand(command);
+  });
+});
+
   </script>
 </body>
 </html>
+
