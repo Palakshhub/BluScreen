@@ -67,10 +67,10 @@ Bluetooth Details (For Developers)
 Data is sent as UTF-8 encoded text
 
 - Notes & Limitations
-Voice recognition depends on browser support
-Internet is required for speech recognition
-Commands are sent as plain text. Parsing happens on the ESP32
-Page must remain open while connected
+Voice recognition depends on browser support.
+Internet is required for speech recognition.
+Commands are sent as plain text. Parsing happens on the ESP32. Page must remain open while connected
+
 Project Context
 
 BluScreen Control Hub is part of the BluScreen Smart Display System, an IoT-based LED matrix display capable of showing time, date, weather, reminders, timers, and custom text using Wi-Fi and BLE connectivity.
