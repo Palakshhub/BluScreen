@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BluScreen Control Hub</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2300AAFF' d='M12 18c1.104 0 2-.896 2-2s-.896-2-2-2-2 .896-2 2 .896 2 2 2zm0-5c3.314 0 6 2.686 6 6h-2c0-2.209-1.791-4-4-4s-4 1.791-4 4H6c0-3.314 2.686-6 6-6zm0-5c5.523 0 10 4.477 10 10h-2c0-4.418-3.582-8-8-8s-8 3.582-8 8H2c0-5.523 4.477-10 10-10z'/%3E%3C/svg%3E" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      --bg: radial-gradient(#000 5%, #0000 6%);
+      --size: 3rem;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(#000 5%, #0000 6%), radial-gradient(#000 5%, #0000 6%);
+      background-position: 0 0, calc(var(--size) / 2) calc(var(--size) / 2);
+      background-size: var(--size) var(--size);
+    }
+
+    .card {
+      background-color: rgba(255, 255, 255, 0.98);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .pulse-animation { animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0% { opacity: 0.8; }
+      50% { opacity: 0.2; }
+      100% { opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="px-3 sm:px-4 py-6 w-full text-center">
+    <h1 class="text-4xl font-bold text-gray-800 mb-30">BluScreen Smart Display Control Hub</h1>
+    <p class="text-black-600 text-sm">Connect to your BluScreen Device and send commands to show outputs on it's display!</p>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-grow w-full px-3 pb-4">
+    <!-- Connect Button -->
+    <div class="flex justify-center mb-6">
+      <button id="connectBtn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg">
+        🔌 Connect ESP32
+      </button>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex flex-col gap-3 w-full mb-4 mx-auto max-w-md">
+      <button id="recordBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium">
+        🎙 Record
+      </button>
+      <button id="typeBtn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-medium">
+        ⌨ Type
+      </button>
+    </div>
+
+    <!-- Record Section -->
+    <div id="recordSection" class="hidden w-full mb-4 mx-auto max-w-md">
+      <div id="recordingIndicator" class="hidden mb-3 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-800 rounded-full text-sm">
+          <div class="w-2 h-2 rounded-full bg-red-500 pulse-animation"></div>
+          <span class="font-medium">Recording...</span>
+        </div>
+      </div>
+
+      <div id="voiceResult" class="card hidden border border-gray-200 p-3">
+        <div id="voiceText" class="text-gray-700 mb-3 text-sm"></div>
+        <button id="sendVoiceBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium">
+          Send to ESP32
+        </button>
+      </div>
+    </div>
+
+    <!-- Type Section -->
+    <div id="typeSection" class="hidden w-full mb-4 mx-auto max-w-md">
+      <div class="card border border-gray-200 p-3">
+        <textarea id="typeInput" class="w-full border rounded-lg p-2 mb-3 resize-none text-sm" rows="3" placeholder="Type your command here..."></textarea>
+        <button id="sendTextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-medium">
+          Send to ESP32
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Command Buttons -->
+<div class="grid grid-cols-2 gap-3 w-full mb-4 mx-auto max-w-md">
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="show time">
+    🕒 Time
+  </button>
+
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="show date">
+    📅 Date
+  </button>
+
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="show weather">
+    🌦 Weather
+  </button>
+
+  <button class="quickCmd bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium"
+          data-command="show temperature">
+    🌡 Temperature
+  </button>
+</div>
+
+<!-- Brightness Control -->
+<div class="w-full mb-6 mx-auto max-w-md">
+  <div class="card border border-gray-200 p-4">
+    <h2 class="text-lg font-semibold text-gray-800 mb-3">
+      🔆 Brightness Control
+    </h2>
+
+    <div class="flex items-center gap-3">
+      <input
+        id="brightnessSlider"
+        type="range"
+        min="1"
+        max="10"
+        value="5"
+        class="w-full"
+      />
+      <span id="brightnessValue" class="text-sm font-medium text-gray-700">
+        5
+      </span>
+    </div>
+
+    <button
+      id="applyBrightnessBtn"
+      class="hidden mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium"
+    >
+      Apply Brightness
+    </button>
+  </div>
+</div>
+
+  </main>
+
+  <!-- Script -->
+  <script>
+    let bluetoothDevice;
+    let txCharacteristic;
+    const SERVICE_UUID = "12345678-1234-5678-1234-56789abcdef0";
+    const CHARACTERISTIC_UUID = "abcdef01-1234-5678-1234-56789abcdef0";
+
+    // Connect ESP32
+    document.getElementById('connectBtn').addEventListener('click', async () => {
+      try {
+        bluetoothDevice = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "BluScreen" }],
+          optionalServices: [SERVICE_UUID]
+        });
+        const server = await bluetoothDevice.gatt.connect();
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        txCharacteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+        alert("✅ Connected to ESP32!");
+      } catch (err) {
+        alert("⚠ Could not connect: " + err);
+      }
+    });
+
+    // Send command helper
+    async function sendCommand(command) {
+      if (!txCharacteristic) {
+        alert("⚠ Not connected. Click 'Connect ESP32' first.");
+        return;
+      }
+      try {
+        const encoder = new TextEncoder();
+        await txCharacteristic.writeValue(encoder.encode(command));
+        console.log("📤 Sent:", command);
+      } catch (err) {
+        alert("⚠ Failed to send: " + err);
+      }
+    }
+
+    // UI handlers
+    const recordBtn = document.getElementById('recordBtn');
+    const typeBtn = document.getElementById('typeBtn');
+    const recordSection = document.getElementById('recordSection');
+    const typeSection = document.getElementById('typeSection');
+    const recordingIndicator = document.getElementById('recordingIndicator');
+    const voiceResult = document.getElementById('voiceResult');
+    const voiceText = document.getElementById('voiceText');
+    const sendVoiceBtn = document.getElementById('sendVoiceBtn');
+    const typeInput = document.getElementById('typeInput');
+    const sendTextBtn = document.getElementById('sendTextBtn');
+
+    // Speech Recognition
+    let recognition, isRecording = false;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isRecording = true;
+        recordingIndicator.classList.remove('hidden');
+      };
+
+      recognition.onend = () => {
+        isRecording = false;
+        recordingIndicator.classList.add('hidden');
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results).map(r => r[0].transcript).join('');
+        voiceText.textContent = transcript;
+        voiceResult.classList.remove('hidden');
+      };
+    } else {
+      recordBtn.disabled = true;
+      recordBtn.innerHTML = 'Voice Not Supported';
+    }
+
+    // Button events
+    recordBtn.addEventListener('click', () => {
+      recordSection.classList.remove('hidden');
+      typeSection.classList.add('hidden');
+      if (isRecording) recognition.stop();
+      else {
+        voiceResult.classList.add('hidden');
+        recognition.start();
+      }
+    });
+
+    typeBtn.addEventListener('click', () => {
+      typeSection.classList.remove('hidden');
+      recordSection.classList.add('hidden');
+      if (isRecording) recognition.stop();
+    });
+
+    sendVoiceBtn.addEventListener('click', () => sendCommand(voiceText.textContent.trim()));
+    sendTextBtn.addEventListener('click', () => sendCommand(typeInput.value.trim()));
+
+    // Quick command buttons
+document.querySelectorAll('.quickCmd').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const command = btn.dataset.command;
+    sendCommand(command);
+  });
+});
+
+// ---------------- Brightness Slider Logic ----------------
+const brightnessSlider = document.getElementById("brightnessSlider");
+const brightnessValue = document.getElementById("brightnessValue");
+const applyBrightnessBtn = document.getElementById("applyBrightnessBtn");
+
+let currentBrightness = brightnessSlider.value;
+
+// Update value + show button when slider moves
+brightnessSlider.addEventListener("input", () => {
+  currentBrightness = brightnessSlider.value;
+  brightnessValue.textContent = currentBrightness;
+  applyBrightnessBtn.classList.remove("hidden");
+});
+
+// Send brightness to ESP32 when button clicked
+applyBrightnessBtn.addEventListener("click", () => {
+  sendCommand(`BRIGHTNESS:${currentBrightness}`);
+  applyBrightnessBtn.classList.add("hidden");
+});
+
+  </script>
+</body>
+</html>
