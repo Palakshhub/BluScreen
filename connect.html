@@ -115,6 +115,37 @@
     🌡 Temperature
   </button>
 </div>
+
+<!-- Brightness Control -->
+<div class="w-full mb-6 mx-auto max-w-md">
+  <div class="card border border-gray-200 p-4">
+    <h2 class="text-lg font-semibold text-gray-800 mb-3">
+      🔆 Brightness Control
+    </h2>
+
+    <div class="flex items-center gap-3">
+      <input
+        id="brightnessSlider"
+        type="range"
+        min="1"
+        max="10"
+        value="5"
+        class="w-full"
+      />
+      <span id="brightnessValue" class="text-sm font-medium text-gray-700">
+        5
+      </span>
+    </div>
+
+    <button
+      id="applyBrightnessBtn"
+      class="hidden mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium"
+    >
+      Apply Brightness
+    </button>
+  </div>
+</div>
+
   </main>
 
   <!-- Script -->
@@ -224,8 +255,26 @@ document.querySelectorAll('.quickCmd').forEach(btn => {
   });
 });
 
+// ---------------- Brightness Slider Logic ----------------
+const brightnessSlider = document.getElementById("brightnessSlider");
+const brightnessValue = document.getElementById("brightnessValue");
+const applyBrightnessBtn = document.getElementById("applyBrightnessBtn");
+
+let currentBrightness = brightnessSlider.value;
+
+// Update value + show button when slider moves
+brightnessSlider.addEventListener("input", () => {
+  currentBrightness = brightnessSlider.value;
+  brightnessValue.textContent = currentBrightness;
+  applyBrightnessBtn.classList.remove("hidden");
+});
+
+// Send brightness to ESP32 when button clicked
+applyBrightnessBtn.addEventListener("click", () => {
+  sendCommand(`BRIGHTNESS:${currentBrightness}`);
+  applyBrightnessBtn.classList.add("hidden");
+});
+
   </script>
 </body>
 </html>
-
-
